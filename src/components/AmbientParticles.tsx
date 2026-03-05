@@ -43,7 +43,7 @@ const AmbientParticles: React.FC = () => {
     particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 3 + 1,
+      radius: Math.random() * 6 + 3,
       vx: (Math.random() - 0.5) * 0.4,
       vy: (Math.random() - 0.5) * 0.4,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
