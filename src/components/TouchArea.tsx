@@ -156,28 +156,19 @@ const TouchArea: React.FC = () => {
         {/* Ambient particles */}
         {appState === "idle" && <AmbientParticles />}
 
-        {/* Settings button */}
-        {appState === "idle" && (
-          <button
-            className="absolute top-6 right-6 z-[50] w-10 h-10 rounded-full flex items-center justify-center bg-muted/30 backdrop-blur-sm"
-            onTouchEnd={(e) => {
-              e.stopPropagation();
-              setSettingsOpen(true);
-            }}
-          >
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
-        )}
 
         {/* Idle state */}
         {appState === "idle" && touches.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <h1 className="text-4xl font-extrabold text-foreground mb-6 tracking-tight">
+              마곡픽!
+            </h1>
             <div className="animate-float-up">
               <div className="text-7xl mb-8">👆</div>
             </div>
-            <h1 className="text-xl font-bold text-foreground mb-2">
+            <p className="text-lg font-medium text-foreground mb-2">
               화면에 손가락을 올려주세요
-            </h1>
+            </p>
             <p className="text-sm text-muted-foreground">
               {MODE_LABELS[settings.mode]} 모드
             </p>
