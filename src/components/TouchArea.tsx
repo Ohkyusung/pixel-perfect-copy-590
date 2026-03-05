@@ -7,6 +7,7 @@ import { useSound } from "../hooks/useSound";
 import { useSettings } from "../contexts/SettingsContext";
 import FingerCircle from "./FingerCircle";
 import Confetti from "./Confetti";
+import AmbientParticles from "./AmbientParticles";
 import SettingsModal from "./SettingsModal";
 
 type AppState = "idle" | "detecting" | "stabilizing" | "selecting" | "result";
@@ -152,6 +153,9 @@ const TouchArea: React.FC = () => {
         style={{ background: "var(--gradient-bg)" }}
         {...handlers}
       >
+        {/* Ambient particles */}
+        {appState === "idle" && <AmbientParticles />}
+
         {/* Settings button */}
         {appState === "idle" && (
           <button
