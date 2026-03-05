@@ -156,18 +156,6 @@ const TouchArea: React.FC = () => {
         {/* Ambient particles */}
         {appState === "idle" && <AmbientParticles />}
 
-        {/* Settings button */}
-        {appState === "idle" && (
-          <button
-            className="absolute top-6 right-6 z-[50] w-10 h-10 rounded-full flex items-center justify-center bg-muted/30 backdrop-blur-sm"
-            onTouchEnd={(e) => {
-              e.stopPropagation();
-              setSettingsOpen(true);
-            }}
-          >
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
-        )}
 
         {/* Idle state */}
         {appState === "idle" && touches.length === 0 && (
