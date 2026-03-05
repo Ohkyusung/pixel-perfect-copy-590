@@ -78,15 +78,15 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
             r={ringRadius}
             fill="none"
             stroke={`hsl(${color} / 0.3)`}
-            strokeWidth="4"
+          strokeWidth="6"
           />
           <circle
             cx="50"
             cy="50"
             r={ringRadius}
             fill="none"
-            stroke={`hsl(${color})`}
-            strokeWidth="4"
+            stroke="hsl(55 100% 65%)"
+            strokeWidth="6"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
