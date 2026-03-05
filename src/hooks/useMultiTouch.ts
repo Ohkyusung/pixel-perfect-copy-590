@@ -23,7 +23,7 @@ export function useMultiTouch() {
   const rafRef = useRef<number | null>(null);
   const touchesRef = useRef<TouchPoint[]>([]);
 
-  const updateTouches = useCallback((touchList: TouchList) => {
+  const updateTouches = useCallback((touchList: React.TouchList) => {
     const newTouches: TouchPoint[] = [];
     for (let i = 0; i < touchList.length; i++) {
       const t = touchList[i];
