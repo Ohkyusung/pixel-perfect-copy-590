@@ -89,7 +89,7 @@ const TouchArea: React.FC = () => {
         setSelectionResult(null);
         resetStabilization();
         resetColorMap();
-      }, 2000);
+      }, 3000);
     }
     return () => {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
