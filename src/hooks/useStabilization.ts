@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { TouchPoint } from "./useMultiTouch";
 
-const MOVEMENT_THRESHOLD = 12;
+const MOVEMENT_THRESHOLD_SQ = 144; // 12px squared
 
 export function useStabilization(
   touches: TouchPoint[],
@@ -15,12 +15,13 @@ export function useStabilization(
   const prevPositions = useRef<Map<number, { x: number; y: number }>>(new Map());
   const stableStartTime = useRef<number | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  const isRunning = useRef(false);
   const waitTimeRef = useRef(waitTime);
+  const touchCountRef = useRef(0);
+  const completedRef = useRef(false);
+
   waitTimeRef.current = waitTime;
 
   const stopLoop = useCallback(() => {
-    isRunning.current = false;
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -29,6 +30,7 @@ export function useStabilization(
 
   const reset = useCallback(() => {
     stableStartTime.current = null;
+    completedRef.current = false;
     stopLoop();
     setIsStable(false);
     setProgress(0);
@@ -36,20 +38,20 @@ export function useStabilization(
   }, [stopLoop]);
 
   const startLoop = useCallback(() => {
-    if (isRunning.current) return;
+    if (stableStartTime.current || completedRef.current) return;
     stableStartTime.current = performance.now();
-    isRunning.current = true;
     setIsCountingDown(true);
 
     const tick = () => {
-      if (!isRunning.current || !stableStartTime.current) return;
+      if (!stableStartTime.current || completedRef.current) return;
       const elapsed = performance.now() - stableStartTime.current;
       const p = Math.min(elapsed / (waitTimeRef.current * 1000), 1);
       setProgress(p);
       if (p >= 1) {
-        isRunning.current = false;
+        completedRef.current = true;
         setIsStable(true);
         setIsCountingDown(false);
+        animFrameRef.current = null;
         return;
       }
       animFrameRef.current = requestAnimationFrame(tick);
@@ -57,13 +59,23 @@ export function useStabilization(
     animFrameRef.current = requestAnimationFrame(tick);
   }, []);
 
-  // Movement detection - decoupled from animation loop
+  // Touch count change detection
   useEffect(() => {
-    if (touches.length < minTouches) {
+    if (touches.length !== touchCountRef.current) {
+      touchCountRef.current = touches.length;
       reset();
       prevPositions.current.clear();
-      return;
+      // Re-seed positions from current touches
+      for (const t of touches) {
+        prevPositions.current.set(t.id, { x: t.x, y: t.y });
+      }
     }
+  }, [touches, reset]);
+
+  // Movement detection - only when we have enough touches and not completed
+  useEffect(() => {
+    if (completedRef.current) return;
+    if (touches.length < minTouches) return;
 
     let moved = false;
     for (const t of touches) {
@@ -71,40 +83,31 @@ export function useStabilization(
       if (prev) {
         const dx = t.x - prev.x;
         const dy = t.y - prev.y;
-        if (dx * dx + dy * dy > MOVEMENT_THRESHOLD * MOVEMENT_THRESHOLD) {
+        if (dx * dx + dy * dy > MOVEMENT_THRESHOLD_SQ) {
           moved = true;
+          // Update position on movement
+          prevPositions.current.set(t.id, { x: t.x, y: t.y });
         }
-      }
-      prevPositions.current.set(t.id, { x: t.x, y: t.y });
-    }
-
-    const activeIds = new Set(touches.map((t) => t.id));
-    for (const id of prevPositions.current.keys()) {
-      if (!activeIds.has(id)) {
-        prevPositions.current.delete(id);
-        moved = true;
+        // Don't update position if no significant movement - prevents drift accumulation
+      } else {
+        prevPositions.current.set(t.id, { x: t.x, y: t.y });
       }
     }
 
     if (moved) {
       reset();
+      // Re-seed all positions after reset
+      for (const t of touches) {
+        prevPositions.current.set(t.id, { x: t.x, y: t.y });
+      }
       return;
     }
 
     // Start countdown if not already running
-    if (!isRunning.current) {
+    if (!stableStartTime.current && !completedRef.current) {
       startLoop();
     }
   }, [touches, minTouches, reset, startLoop]);
-
-  // Reset when touch count changes
-  const prevCountRef = useRef(touches.length);
-  useEffect(() => {
-    if (touches.length !== prevCountRef.current) {
-      reset();
-    }
-    prevCountRef.current = touches.length;
-  }, [touches.length, reset]);
 
   // Cleanup on unmount
   useEffect(() => stopLoop, [stopLoop]);
