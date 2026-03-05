@@ -33,7 +33,7 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
   delay = 0,
 }) => {
   const color = FINGER_COLORS[colorIndex % 10];
-  const size = state === "winner" ? 100 : 80;
+  const size = state === "winner" ? 160 : 130;
   const halfSize = size / 2;
 
   const getClassName = () => {
