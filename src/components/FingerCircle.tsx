@@ -101,7 +101,7 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
         className={`absolute inset-2 rounded-full ${getClassName()}`}
         style={{
           backgroundColor: `hsl(${color} / 0.4)`,
-          border: `3px solid hsl(${color})`,
+          border: `5px solid hsl(${color})`,
           boxShadow: `0 0 20px hsl(${color} / 0.5), inset 0 0 20px hsl(${color} / 0.2)`,
           color: `hsl(${color})`,
           animationDelay: state === "loser" ? `${delay}ms` : undefined,
