@@ -78,15 +78,15 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
             r={ringRadius}
             fill="none"
             stroke={`hsl(${color} / 0.3)`}
-            strokeWidth="4"
+          strokeWidth="6"
           />
           <circle
             cx="50"
             cy="50"
             r={ringRadius}
             fill="none"
-            stroke={`hsl(${color})`}
-            strokeWidth="4"
+            stroke="hsl(55 100% 65%)"
+            strokeWidth="6"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
@@ -101,7 +101,7 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
         className={`absolute inset-2 rounded-full ${getClassName()}`}
         style={{
           backgroundColor: `hsl(${color} / 0.4)`,
-          border: `3px solid hsl(${color})`,
+          border: `5px solid hsl(${color})`,
           boxShadow: `0 0 20px hsl(${color} / 0.5), inset 0 0 20px hsl(${color} / 0.2)`,
           color: `hsl(${color})`,
           animationDelay: state === "loser" ? `${delay}ms` : undefined,
