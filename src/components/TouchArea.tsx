@@ -160,7 +160,14 @@ const TouchArea: React.FC = () => {
         {/* Idle state */}
         {appState === "idle" && touches.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <h1 className="text-4xl font-extrabold text-foreground mb-6 tracking-tight">
+            <h1
+              className="text-5xl font-extrabold tracking-tight mb-6 animate-pulse"
+              style={{
+                color: "hsl(280 100% 75%)",
+                textShadow:
+                  "0 0 10px hsl(280 100% 65% / 0.8), 0 0 30px hsl(280 100% 60% / 0.6), 0 0 60px hsl(320 100% 60% / 0.4), 0 0 100px hsl(200 100% 60% / 0.2)",
+              }}
+            >
               마곡픽!
             </h1>
             <div className="animate-float-up">
