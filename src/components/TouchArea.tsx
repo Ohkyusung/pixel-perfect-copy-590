@@ -153,6 +153,9 @@ const TouchArea: React.FC = () => {
         style={{ background: "var(--gradient-bg)" }}
         {...handlers}
       >
+        {/* Ambient particles */}
+        {appState === "idle" && <AmbientParticles />}
+
         {/* Settings button */}
         {appState === "idle" && (
           <button
