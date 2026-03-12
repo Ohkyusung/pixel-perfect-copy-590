@@ -22,7 +22,7 @@ const MODE_LABELS: Record<string, string> = {
 const TouchArea: React.FC = () => {
   const { settings } = useSettings();
   const { touches, handlers, resetColorMap } = useMultiTouch();
-  const { isStable, progress, reset: resetStabilization } = useStabilization(
+  const { isStable, progress, isCountingDown, reset: resetStabilization } = useStabilization(
     touches,
     settings.waitTime
   );
@@ -54,9 +54,9 @@ const TouchArea: React.FC = () => {
     } else if (touches.length === 1) {
       setAppState("detecting");
     } else {
-      setAppState(progress > 0 ? "stabilizing" : "detecting");
+      setAppState(isCountingDown || progress > 0 ? "stabilizing" : "detecting");
     }
-  }, [touches.length, progress, appState]);
+  }, [touches.length, progress, isCountingDown, appState]);
 
   // Selection trigger
   useEffect(() => {

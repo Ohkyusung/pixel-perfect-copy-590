@@ -65,7 +65,7 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
       }}
     >
       {/* Progress ring */}
-      {state === "stabilizing" && progress > 0 && (
+      {state === "stabilizing" && (
         <svg
           className="absolute inset-0"
           width={size}
