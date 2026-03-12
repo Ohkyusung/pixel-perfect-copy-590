@@ -54,7 +54,7 @@ const TouchArea: React.FC = () => {
     } else if (touches.length === 1) {
       setAppState("detecting");
     } else {
-      setAppState(progress > 0 ? "stabilizing" : "detecting");
+      setAppState(isCountingDown || progress > 0 ? "stabilizing" : "detecting");
     }
   }, [touches.length, progress, appState]);
 
