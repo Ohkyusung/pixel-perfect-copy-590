@@ -22,7 +22,7 @@ const MODE_LABELS: Record<string, string> = {
 const TouchArea: React.FC = () => {
   const { settings } = useSettings();
   const { touches, handlers, resetColorMap } = useMultiTouch();
-  const { isStable, progress, reset: resetStabilization } = useStabilization(
+  const { isStable, progress, isCountingDown, reset: resetStabilization } = useStabilization(
     touches,
     settings.waitTime
   );
