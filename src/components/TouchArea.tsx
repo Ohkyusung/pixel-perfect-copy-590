@@ -56,7 +56,7 @@ const TouchArea: React.FC = () => {
     } else {
       setAppState(isCountingDown || progress > 0 ? "stabilizing" : "detecting");
     }
-  }, [touches.length, progress, appState]);
+  }, [touches.length, progress, isCountingDown, appState]);
 
   // Selection trigger
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { TouchPoint } from "./useMultiTouch";
 
-const MOVEMENT_THRESHOLD_SQ = 144; // 12px squared
+const MOVEMENT_THRESHOLD_SQ = 225; // 15px squared per-frame
 
 export function useStabilization(
   touches: TouchPoint[],
@@ -12,33 +12,38 @@ export function useStabilization(
   const [progress, setProgress] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
 
-  const prevPositions = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const lastPositions = useRef<Map<number, { x: number; y: number }>>(new Map());
   const stableStartTime = useRef<number | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const waitTimeRef = useRef(waitTime);
-  const touchCountRef = useRef(0);
   const completedRef = useRef(false);
+  const touchIdsRef = useRef<string>("");
 
   waitTimeRef.current = waitTime;
 
   const stopLoop = useCallback(() => {
-    if (animFrameRef.current) {
+    if (animFrameRef.current !== null) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
     }
   }, []);
 
-  const reset = useCallback(() => {
+  const resetProgress = useCallback(() => {
     stableStartTime.current = null;
-    completedRef.current = false;
     stopLoop();
-    setIsStable(false);
     setProgress(0);
     setIsCountingDown(false);
   }, [stopLoop]);
 
+  const fullReset = useCallback(() => {
+    completedRef.current = false;
+    resetProgress();
+    setIsStable(false);
+    lastPositions.current.clear();
+  }, [resetProgress]);
+
   const startLoop = useCallback(() => {
-    if (stableStartTime.current || completedRef.current) return;
+    if (stableStartTime.current !== null || completedRef.current) return;
     stableStartTime.current = performance.now();
     setIsCountingDown(true);
 
@@ -59,58 +64,55 @@ export function useStabilization(
     animFrameRef.current = requestAnimationFrame(tick);
   }, []);
 
-  // Touch count change detection
+  // Detect touch set changes (count or IDs changed) → full reset
   useEffect(() => {
-    if (touches.length !== touchCountRef.current) {
-      touchCountRef.current = touches.length;
-      reset();
-      prevPositions.current.clear();
-      // Re-seed positions from current touches
+    const ids = touches.map(t => t.id).sort().join(",");
+    if (ids !== touchIdsRef.current) {
+      touchIdsRef.current = ids;
+      fullReset();
+      // Seed positions
       for (const t of touches) {
-        prevPositions.current.set(t.id, { x: t.x, y: t.y });
+        lastPositions.current.set(t.id, { x: t.x, y: t.y });
       }
     }
-  }, [touches, reset]);
+  }, [touches, fullReset]);
 
-  // Movement detection - only when we have enough touches and not completed
+  // Movement detection + countdown start
   useEffect(() => {
     if (completedRef.current) return;
     if (touches.length < minTouches) return;
 
+    // Frame-to-frame movement check: compare current vs last known position
     let moved = false;
     for (const t of touches) {
-      const prev = prevPositions.current.get(t.id);
-      if (prev) {
-        const dx = t.x - prev.x;
-        const dy = t.y - prev.y;
+      const last = lastPositions.current.get(t.id);
+      if (last) {
+        const dx = t.x - last.x;
+        const dy = t.y - last.y;
         if (dx * dx + dy * dy > MOVEMENT_THRESHOLD_SQ) {
           moved = true;
-          // Update position on movement
-          prevPositions.current.set(t.id, { x: t.x, y: t.y });
         }
-        // Don't update position if no significant movement - prevents drift accumulation
-      } else {
-        prevPositions.current.set(t.id, { x: t.x, y: t.y });
       }
     }
 
+    // Always update positions to latest (frame-to-frame, not cumulative)
+    for (const t of touches) {
+      lastPositions.current.set(t.id, { x: t.x, y: t.y });
+    }
+
     if (moved) {
-      reset();
-      // Re-seed all positions after reset
-      for (const t of touches) {
-        prevPositions.current.set(t.id, { x: t.x, y: t.y });
-      }
+      resetProgress();
       return;
     }
 
     // Start countdown if not already running
-    if (!stableStartTime.current && !completedRef.current) {
+    if (stableStartTime.current === null && !completedRef.current) {
       startLoop();
     }
-  }, [touches, minTouches, reset, startLoop]);
+  }, [touches, minTouches, resetProgress, startLoop]);
 
-  // Cleanup on unmount
+  // Cleanup
   useEffect(() => stopLoop, [stopLoop]);
 
-  return { isStable, progress, isCountingDown, reset };
+  return { isStable, progress, isCountingDown, reset: fullReset };
 }
