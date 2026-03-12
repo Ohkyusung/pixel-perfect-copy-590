@@ -84,17 +84,23 @@ const TouchArea: React.FC = () => {
   // Auto-reset when all fingers removed during result
   useEffect(() => {
     if (appState === "result" && touches.length === 0) {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       resetTimerRef.current = setTimeout(() => {
+        resetTimerRef.current = null;
         setAppState("idle");
         setSelectionResult(null);
         resetStabilization();
         resetColorMap();
       }, 1000);
     }
-    return () => {
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    };
-  }, [appState, touches.length, resetStabilization, resetColorMap]);
+    // Only clear timer if fingers return during result
+    if (appState === "result" && touches.length > 0) {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = null;
+      }
+    }
+  }, [appState, touches.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Screen rotation reset
   useEffect(() => {
