@@ -34,7 +34,10 @@ const TouchArea: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [resultCountdown, setResultCountdown] = useState<number | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const selectionTouchesRef = useRef(touches);
 
   // Desktop detection
@@ -58,6 +61,17 @@ const TouchArea: React.FC = () => {
     }
   }, [touches.length, progress, isCountingDown, appState]);
 
+  const doReset = useCallback(() => {
+    if (autoResetTimerRef.current) { clearTimeout(autoResetTimerRef.current); autoResetTimerRef.current = null; }
+    if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+    if (resetTimerRef.current) { clearTimeout(resetTimerRef.current); resetTimerRef.current = null; }
+    setResultCountdown(null);
+    setAppState("idle");
+    setSelectionResult(null);
+    resetStabilization();
+    resetColorMap();
+  }, [resetStabilization, resetColorMap]);
+
   // Selection trigger
   useEffect(() => {
     if (isStable && appState === "stabilizing") {
@@ -77,30 +91,40 @@ const TouchArea: React.FC = () => {
         setShowConfetti(true);
         playWinnerFanfare();
         setTimeout(() => setShowConfetti(false), 2000);
+
+        // Start 3-second auto-reset countdown
+        setResultCountdown(3);
+        countdownIntervalRef.current = setInterval(() => {
+          setResultCountdown(prev => {
+            if (prev === null || prev <= 1) return prev;
+            return prev - 1;
+          });
+        }, 1000);
+        autoResetTimerRef.current = setTimeout(() => {
+          doReset();
+        }, 3000);
       }, 600);
     }
-  }, [isStable, appState, touches, select, settings, playWinnerFanfare]);
+  }, [isStable, appState, touches, select, settings, playWinnerFanfare, doReset]);
 
-  // Auto-reset when all fingers removed during result
+  // Faster reset if all fingers removed during result (1s)
   useEffect(() => {
     if (appState === "result" && touches.length === 0) {
+      // Clear the 3s timer and reset after 1s instead
+      if (autoResetTimerRef.current) { clearTimeout(autoResetTimerRef.current); autoResetTimerRef.current = null; }
+      if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       resetTimerRef.current = setTimeout(() => {
-        resetTimerRef.current = null;
-        setAppState("idle");
-        setSelectionResult(null);
-        resetStabilization();
-        resetColorMap();
+        doReset();
       }, 1000);
     }
-    // Only clear timer if fingers return during result
     if (appState === "result" && touches.length > 0) {
       if (resetTimerRef.current) {
         clearTimeout(resetTimerRef.current);
         resetTimerRef.current = null;
       }
     }
-  }, [appState, touches.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [appState, touches.length, doReset]);
 
   // Screen rotation reset
   useEffect(() => {
@@ -242,6 +266,17 @@ const TouchArea: React.FC = () => {
             const t = displayTouches[wi];
             return t ? <Confetti key={wi} x={t.x} y={t.y} /> : null;
           })}
+
+        {/* Result countdown timer */}
+        {appState === "result" && resultCountdown !== null && (
+          <div className="absolute top-12 left-0 right-0 flex justify-center pointer-events-none z-50">
+            <div className="px-5 py-2 rounded-full bg-muted/40 backdrop-blur-sm">
+              <span className="text-sm text-muted-foreground font-medium">
+                {resultCountdown}초 후 초기화
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
