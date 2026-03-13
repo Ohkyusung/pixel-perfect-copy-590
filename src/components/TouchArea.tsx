@@ -34,7 +34,10 @@ const TouchArea: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [resultCountdown, setResultCountdown] = useState<number | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const selectionTouchesRef = useRef(touches);
 
   // Desktop detection
