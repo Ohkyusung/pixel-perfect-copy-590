@@ -92,7 +92,7 @@ const TouchArea: React.FC = () => {
         playWinnerFanfare();
         setTimeout(() => setShowConfetti(false), 2000);
 
-        // Start 3-second auto-reset countdown
+        // Start 3-second auto-reset countdown (NEVER cleared except by doReset)
         setResultCountdown(3);
         countdownIntervalRef.current = setInterval(() => {
           setResultCountdown(prev => {
