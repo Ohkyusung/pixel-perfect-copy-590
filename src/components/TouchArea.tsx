@@ -92,7 +92,7 @@ const TouchArea: React.FC = () => {
         playWinnerFanfare();
         setTimeout(() => setShowConfetti(false), 2000);
 
-        // Start 3-second auto-reset countdown
+        // Start 3-second auto-reset countdown (NEVER cleared except by doReset)
         setResultCountdown(3);
         countdownIntervalRef.current = setInterval(() => {
           setResultCountdown(prev => {
@@ -108,17 +108,18 @@ const TouchArea: React.FC = () => {
   }, [isStable, appState, touches, select, settings, playWinnerFanfare, doReset]);
 
   // Faster reset if all fingers removed during result (1s)
+  // NOTE: 3s safety timer is NEVER cleared here — only doReset clears it
   useEffect(() => {
     if (appState === "result" && touches.length === 0) {
-      // Clear the 3s timer and reset after 1s instead
-      if (autoResetTimerRef.current) { clearTimeout(autoResetTimerRef.current); autoResetTimerRef.current = null; }
-      if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = setTimeout(() => {
-        doReset();
-      }, 1000);
+      // Add a faster 1s reset, but keep the 3s safety net intact
+      if (!resetTimerRef.current) {
+        resetTimerRef.current = setTimeout(() => {
+          doReset();
+        }, 1000);
+      }
     }
     if (appState === "result" && touches.length > 0) {
+      // Cancel only the fast reset if fingers come back
       if (resetTimerRef.current) {
         clearTimeout(resetTimerRef.current);
         resetTimerRef.current = null;
