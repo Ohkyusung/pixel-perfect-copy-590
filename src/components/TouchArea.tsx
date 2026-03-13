@@ -266,6 +266,17 @@ const TouchArea: React.FC = () => {
             const t = displayTouches[wi];
             return t ? <Confetti key={wi} x={t.x} y={t.y} /> : null;
           })}
+
+        {/* Result countdown timer */}
+        {appState === "result" && resultCountdown !== null && (
+          <div className="absolute top-12 left-0 right-0 flex justify-center pointer-events-none z-50">
+            <div className="px-5 py-2 rounded-full bg-muted/40 backdrop-blur-sm">
+              <span className="text-sm text-muted-foreground font-medium">
+                {resultCountdown}초 후 초기화
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
