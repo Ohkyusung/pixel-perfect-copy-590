@@ -210,6 +210,11 @@ const TouchArea: React.FC = () => {
               {MODE_LABELS[settings.mode]} 모드
             </p>
           </div>
+          <div className="absolute bottom-6 left-0 right-0 text-center">
+            <p className="text-xs text-muted-foreground/50">
+              MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
+            </p>
+          </div>
         )}
 
         {/* Single finger warning */}
