@@ -91,7 +91,7 @@ const FingerCircle: React.FC<FingerCircleProps> = ({
             strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
             transform="rotate(-90 50 50)"
-            style={{ transition: "stroke-dashoffset 0.05s linear" }}
+            style={{ willChange: "stroke-dashoffset" }}
           />
         </svg>
       )}
