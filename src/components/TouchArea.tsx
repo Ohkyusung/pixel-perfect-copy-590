@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Settings } from "lucide-react";
+import { RotateCcw, Users } from "lucide-react";
 import { useMultiTouch } from "../hooks/useMultiTouch";
 import { useStabilization } from "../hooks/useStabilization";
 import { useSelection, type SelectionResult } from "../hooks/useSelection";
@@ -20,7 +20,7 @@ const MODE_LABELS: Record<string, string> = {
 };
 
 const TouchArea: React.FC = () => {
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { touches, handlers, resetColorMap } = useMultiTouch();
   const { isStable, progress, isCountingDown, reset: resetStabilization } = useStabilization(
     touches,
@@ -184,9 +184,63 @@ const TouchArea: React.FC = () => {
         style={{ background: "var(--gradient-bg)" }}
         {...handlers}
       >
+        {/* Top-left: pick count selector (idle only) */}
+        {appState === "idle" && touches.length === 0 && (
+          <div
+            className="absolute top-6 left-6 z-50 pointer-events-auto"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted/40 backdrop-blur-sm">
+              <Users size={16} className="text-muted-foreground" />
+              {[1, 2, 3, 4, 5].map((n) => {
+                const isActive =
+                  (n === 1 && settings.mode === "pick-one") ||
+                  (n > 1 && settings.mode === "pick-n" && settings.pickCount === n);
+                return (
+                  <button
+                    key={n}
+                    onClick={() => {
+                      if (n === 1) {
+                        updateSettings({ mode: "pick-one", pickCount: 1 });
+                      } else {
+                        updateSettings({ mode: "pick-n", pickCount: n });
+                      }
+                    }}
+                    className={`w-8 h-8 rounded-full text-sm font-semibold transition-all ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:bg-muted/60"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Top-right: reset button (non-idle) */}
+        {appState !== "idle" && (
+          <div
+            className="absolute top-6 right-6 z-50 pointer-events-auto"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={doReset}
+              className="w-11 h-11 rounded-full bg-muted/40 backdrop-blur-sm flex items-center justify-center text-muted-foreground active:scale-90 transition-transform"
+            >
+              <RotateCcw size={20} />
+            </button>
+          </div>
+        )}
+
         {/* Ambient particles */}
         {appState === "idle" && <AmbientParticles />}
-
 
         {/* Idle state */}
         {appState === "idle" && touches.length === 0 && (
