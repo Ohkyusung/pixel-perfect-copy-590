@@ -57,9 +57,9 @@ const TouchArea: React.FC = () => {
     } else if (touches.length === 1) {
       setAppState("detecting");
     } else {
-      setAppState(isCountingDown || progress > 0 ? "stabilizing" : "detecting");
+      setAppState(isCountingDown ? "stabilizing" : "detecting");
     }
-  }, [touches.length, progress, isCountingDown, appState]);
+  }, [touches.length, isCountingDown, appState]);
 
   const doReset = useCallback(() => {
     if (autoResetTimerRef.current) { clearTimeout(autoResetTimerRef.current); autoResetTimerRef.current = null; }

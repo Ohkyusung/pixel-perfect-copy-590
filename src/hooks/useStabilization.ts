@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { TouchPoint } from "./useMultiTouch";
 
-const MOVEMENT_THRESHOLD_SQ = 225; // 15px squared per-frame
+const MOVEMENT_THRESHOLD_SQ = 400; // 20px squared — base threshold
+const LARGE_MOVEMENT_SQ = 2500;    // 50px squared — instant reset
+const PROGRESS_UPDATE_INTERVAL = 33; // ~30fps for UI updates
 
 export function useStabilization(
   touches: TouchPoint[],
@@ -18,6 +20,9 @@ export function useStabilization(
   const waitTimeRef = useRef(waitTime);
   const completedRef = useRef(false);
   const touchIdsRef = useRef<string>("");
+  const lastProgressUpdate = useRef<number>(0);
+  const consecutiveMovementFrames = useRef(0);
+  const lastTouchTime = useRef<number>(performance.now());
 
   waitTimeRef.current = waitTime;
 
@@ -33,10 +38,12 @@ export function useStabilization(
     stopLoop();
     setProgress(0);
     setIsCountingDown(false);
+    lastProgressUpdate.current = 0;
   }, [stopLoop]);
 
   const fullReset = useCallback(() => {
     completedRef.current = false;
+    consecutiveMovementFrames.current = 0;
     resetProgress();
     setIsStable(false);
     lastPositions.current.clear();
@@ -47,11 +54,17 @@ export function useStabilization(
     stableStartTime.current = performance.now();
     setIsCountingDown(true);
 
-    const tick = () => {
+    const tick = (now: number) => {
       if (!stableStartTime.current || completedRef.current) return;
-      const elapsed = performance.now() - stableStartTime.current;
+      const elapsed = now - stableStartTime.current;
       const p = Math.min(elapsed / (waitTimeRef.current * 1000), 1);
-      setProgress(p);
+      
+      // Throttle UI updates to ~30fps
+      if (now - lastProgressUpdate.current >= PROGRESS_UPDATE_INTERVAL || p >= 1) {
+        lastProgressUpdate.current = now;
+        setProgress(p);
+      }
+      
       if (p >= 1) {
         completedRef.current = true;
         setIsStable(true);
@@ -70,10 +83,10 @@ export function useStabilization(
     if (ids !== touchIdsRef.current) {
       touchIdsRef.current = ids;
       fullReset();
-      // Seed positions
       for (const t of touches) {
         lastPositions.current.set(t.id, { x: t.x, y: t.y });
       }
+      lastTouchTime.current = performance.now();
     }
   }, [touches, fullReset]);
 
@@ -82,30 +95,57 @@ export function useStabilization(
     if (completedRef.current) return;
     if (touches.length < minTouches) return;
 
-    // Frame-to-frame movement check: compare current vs last known position
+    const now = performance.now();
+    const dt = now - lastTouchTime.current;
+    lastTouchTime.current = now;
+
+    // Time-corrected threshold: scale by dt relative to 16ms baseline
+    const timeScale = Math.max(dt / 16, 1);
+    const effectiveThreshold = MOVEMENT_THRESHOLD_SQ * timeScale;
+
     let moved = false;
+    let largeMove = false;
+
     for (const t of touches) {
       const last = lastPositions.current.get(t.id);
       if (last) {
         const dx = t.x - last.x;
         const dy = t.y - last.y;
-        if (dx * dx + dy * dy > MOVEMENT_THRESHOLD_SQ) {
+        const distSq = dx * dx + dy * dy;
+        if (distSq > LARGE_MOVEMENT_SQ * timeScale) {
+          largeMove = true;
+          moved = true;
+        } else if (distSq > effectiveThreshold) {
           moved = true;
         }
       }
     }
 
-    // Always update positions to latest (frame-to-frame, not cumulative)
+    // Update positions
     for (const t of touches) {
       lastPositions.current.set(t.id, { x: t.x, y: t.y });
     }
 
-    if (moved) {
+    if (largeMove) {
+      // Instant reset for large movements
+      consecutiveMovementFrames.current = 0;
       resetProgress();
       return;
     }
 
-    // Start countdown if not already running
+    if (moved) {
+      consecutiveMovementFrames.current++;
+      // Hysteresis: require 2+ consecutive movement frames for reset
+      if (consecutiveMovementFrames.current >= 2) {
+        consecutiveMovementFrames.current = 0;
+        resetProgress();
+      }
+      return;
+    }
+
+    // No movement detected
+    consecutiveMovementFrames.current = 0;
+
     if (stableStartTime.current === null && !completedRef.current) {
       startLoop();
     }
