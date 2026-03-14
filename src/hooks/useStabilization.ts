@@ -23,8 +23,15 @@ export function useStabilization(
   const lastProgressUpdate = useRef<number>(0);
   const consecutiveMovementFrames = useRef(0);
   const lastTouchTime = useRef<number>(performance.now());
+  const mountedRef = useRef(true);
 
   waitTimeRef.current = waitTime;
+
+  // Track mounted state
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const stopLoop = useCallback(() => {
     if (animFrameRef.current !== null) {
@@ -55,7 +62,7 @@ export function useStabilization(
     setIsCountingDown(true);
 
     const tick = (now: number) => {
-      if (!stableStartTime.current || completedRef.current) return;
+      if (!mountedRef.current || !stableStartTime.current || completedRef.current) return;
       const elapsed = now - stableStartTime.current;
       const p = Math.min(elapsed / (waitTimeRef.current * 1000), 1);
       
