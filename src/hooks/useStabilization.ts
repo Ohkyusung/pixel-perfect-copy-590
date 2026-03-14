@@ -62,7 +62,7 @@ export function useStabilization(
     setIsCountingDown(true);
 
     const tick = (now: number) => {
-      if (!stableStartTime.current || completedRef.current) return;
+      if (!mountedRef.current || !stableStartTime.current || completedRef.current) return;
       const elapsed = now - stableStartTime.current;
       const p = Math.min(elapsed / (waitTimeRef.current * 1000), 1);
       
