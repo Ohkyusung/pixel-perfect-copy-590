@@ -12,11 +12,12 @@ import SettingsModal from "./SettingsModal";
 
 type AppState = "idle" | "detecting" | "stabilizing" | "selecting" | "result";
 
-const MODE_LABELS: Record<string, string> = {
-  "pick-one": "1명 선택",
-  "pick-n": "N명 선택",
-  teams: "팀 나누기",
-  order: "순서 정하기",
+const getModeLabel = (mode: string, pickCount: number): string => {
+  if (mode === "pick-one") return "1명 선택";
+  if (mode === "pick-n") return `${pickCount}명 선택`;
+  if (mode === "teams") return "팀 나누기";
+  if (mode === "order") return "순서 정하기";
+  return "";
 };
 
 const TouchArea: React.FC = () => {
