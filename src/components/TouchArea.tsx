@@ -173,6 +173,11 @@ const TouchArea: React.FC = () => {
             이 앱은 터치스크린이 필요합니다
           </p>
         </div>
+        <div className="absolute bottom-6 left-0 right-0 text-center">
+          <p className="text-xs text-muted-foreground/50">
+            MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
+          </p>
+        </div>
       </div>
     );
   }
