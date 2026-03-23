@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Github } from "lucide-react";
 import { useMultiTouch } from "../hooks/useMultiTouch";
 import { useStabilization } from "../hooks/useStabilization";
 import { useSelection, type SelectionResult } from "../hooks/useSelection";
@@ -178,6 +178,10 @@ const TouchArea: React.FC = () => {
         <div className="absolute bottom-6 left-0 right-0 text-center">
           <p className="text-xs text-muted-foreground/50">
             MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
+            {" · "}
+            <a href="https://github.com/Ohkyusung/pixel-perfect-copy-590" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline">
+              <Github size={12} /> GitHub
+            </a>
           </p>
         </div>
       </div>
@@ -276,6 +280,10 @@ const TouchArea: React.FC = () => {
             <div className="absolute bottom-6 left-0 right-0 text-center">
               <p className="text-xs text-muted-foreground/50">
                 MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
+                {" · "}
+                <a href="https://github.com/Ohkyusung/pixel-perfect-copy-590" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline">
+                  <Github size={12} /> GitHub
+                </a>
               </p>
             </div>
           </>
