@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { RotateCcw, Users } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useMultiTouch } from "../hooks/useMultiTouch";
 import { useStabilization } from "../hooks/useStabilization";
 import { useSelection, type SelectionResult } from "../hooks/useSelection";
@@ -66,10 +66,12 @@ const TouchArea: React.FC = () => {
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
     if (resetTimerRef.current) { clearTimeout(resetTimerRef.current); resetTimerRef.current = null; }
     setResultCountdown(null);
-    setAppState("idle");
     setSelectionResult(null);
+    setShowConfetti(false);
     resetStabilization();
     resetColorMap();
+    // Set idle last to ensure clean state
+    setAppState("idle");
   }, [resetStabilization, resetColorMap]);
 
   // Selection trigger
@@ -173,6 +175,11 @@ const TouchArea: React.FC = () => {
             이 앱은 터치스크린이 필요합니다
           </p>
         </div>
+        <div className="absolute bottom-6 left-0 right-0 text-center">
+          <p className="text-xs text-muted-foreground/50">
+            MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
+          </p>
+        </div>
       </div>
     );
   }
@@ -193,8 +200,8 @@ const TouchArea: React.FC = () => {
             onTouchMove={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted/40 backdrop-blur-sm">
-              <Users size={16} className="text-muted-foreground" />
-              {[1, 2, 3, 4, 5].map((n) => {
+              <span className="text-xs text-muted-foreground whitespace-nowrap">당첨자 수</span>
+              {[1, 2, 3, 4].map((n) => {
                 const isActive =
                   (n === 1 && settings.mode === "pick-one") ||
                   (n > 1 && settings.mode === "pick-n" && settings.pickCount === n);
