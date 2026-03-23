@@ -66,10 +66,12 @@ const TouchArea: React.FC = () => {
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
     if (resetTimerRef.current) { clearTimeout(resetTimerRef.current); resetTimerRef.current = null; }
     setResultCountdown(null);
-    setAppState("idle");
     setSelectionResult(null);
+    setShowConfetti(false);
     resetStabilization();
     resetColorMap();
+    // Set idle last to ensure clean state
+    setAppState("idle");
   }, [resetStabilization, resetColorMap]);
 
   // Selection trigger
