@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Github } from "lucide-react";
 import { useMultiTouch } from "../hooks/useMultiTouch";
 import { useStabilization } from "../hooks/useStabilization";
 import { useSelection, type SelectionResult } from "../hooks/useSelection";
