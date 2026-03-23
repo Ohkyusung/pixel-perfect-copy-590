@@ -279,7 +279,12 @@ const TouchArea: React.FC = () => {
                 {getModeLabel(settings.mode, settings.pickCount)} 모드
               </p>
             </div>
-            <div className="absolute bottom-6 left-0 right-0 text-center">
+            <div
+              className="absolute bottom-6 left-0 right-0 text-center pointer-events-auto z-50"
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
               <p className="text-xs text-muted-foreground/50">
                 MIT License · Made by 오규성 · <a href="mailto:ogs2222@lgcns.com" className="underline">ogs2222@lgcns.com</a>
                 {" · "}
