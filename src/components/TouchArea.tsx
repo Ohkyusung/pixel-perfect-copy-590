@@ -276,7 +276,7 @@ const TouchArea: React.FC = () => {
                 화면에 손가락을 올려주세요
               </p>
               <p className="text-sm text-muted-foreground">
-                {MODE_LABELS[settings.mode]} 모드
+                {getModeLabel(settings.mode, settings.pickCount)} 모드
               </p>
             </div>
             <div className="absolute bottom-6 left-0 right-0 text-center">
