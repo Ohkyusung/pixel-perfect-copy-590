@@ -198,8 +198,8 @@ const TouchArea: React.FC = () => {
             onTouchMove={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted/40 backdrop-blur-sm">
-              <Users size={16} className="text-muted-foreground" />
-              {[1, 2, 3, 4, 5].map((n) => {
+              <span className="text-xs text-muted-foreground whitespace-nowrap">당첨자 수</span>
+              {[1, 2, 3, 4].map((n) => {
                 const isActive =
                   (n === 1 && settings.mode === "pick-one") ||
                   (n > 1 && settings.mode === "pick-n" && settings.pickCount === n);
